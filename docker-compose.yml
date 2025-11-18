@@ -1,0 +1,37 @@
+services:
+  mongo:
+    image: mongo:latest
+    hostname: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+  opensearch:
+    image: opensearchproject/opensearch:2.4.0
+    hostname: opensearch
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: on-failure
+  graylog:
+    image: graylog/graylog:7.0.0
+    hostname: graylog
+    container_name: graylog
+    ports:
+      - "9000:9000"
+      - "12201:12201/udp"
+    restart: on-failure
+    environment:
+      GRAYLOG_PASSWORD_SECRET: "qkQ7IokTJWvW8s0Fqhn6vxHmKeWu6GPFebDee6cASfmYfecihVF8a5xb9jtH4PxKF7f6CjbAntWeaXcdDEgtWPIgC0RUu2LJ"
+      GRAYLOG_ROOT_PASSWORD_SHA2: "4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2"
+      GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+      GRAYLOG_MONGODB_URI: "mongodb://mongo:27017/graylog"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
+    depends_on:
+      - mongo
+      - opensearch
